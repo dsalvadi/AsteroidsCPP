@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <list>
+#include <string>
 using namespace sf;
 
 // Class to contain animation information
@@ -12,7 +13,9 @@ class Animation
     std::vector<IntRect> frames;
 
     Animation();
-    Animation (Texture &t, int x, int y, int w, int h, int count, float Speed);
+    //Animation (Texture &t, int x, int y, int w, int h, int count, float Speed);
+    void init_anim(Texture &t, int x, int y, int w, int h, int count, float Speed);
+    //~Animation(){};
     void update();
     bool isEnd();
 };
@@ -28,7 +31,7 @@ class Entity
 
     Entity();
 
-    void settings(Animation &a,int X,int Y,float Angle=0,int radius=1);
+    void settings(Animation &a,int X,int Y,float Angle,int radius);
     virtual void update();
     void draw(RenderWindow &app);
     virtual ~Entity();
@@ -56,27 +59,28 @@ class bullet: public Entity
 class player: public Entity
 {
     public:
-   bool thrust;
+    bool thrust;
+    int maxSpeed;
+    float speed;
 
-   player();
-   void update();
+    player();
+    void update();
 };
 
 class Game
 {
     public:
-    int W, H;
     Texture t1,t2,t3,t4,t5,t6,t7;
     Animation sExplosion, sRock, sRock_small, sBullet, sPlayer, sPlayer_go, sExplosion_ship; 
     Sprite background;
     // create a list containing all of the entities currently in use
     std::list<Entity*> entities;    
+    
     // pointer for player
-    player p1;
-    player *p = &p1;
+    player *p;
 
-    Game(int W, int H);
-    void draw(RenderWindow& app);
+    Game();
+    void draw_game(RenderWindow& app);
 };
 
 // detecting collisions using distance between centers of sprites and radii of their bounding circles 
