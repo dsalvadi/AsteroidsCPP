@@ -10,9 +10,9 @@ const int H = 800;
 int state = -1;
 
 int main()
-{
-    Game game(W, H);
+{   
     RenderWindow app(VideoMode(W, H), "Asteroids!");
+    Game game;
     app.setFramerateLimit(60);
     MainMenu mainMenu(W, H);
 
@@ -26,12 +26,12 @@ int main()
         }
         else if (state == 0)
         {
-            game.draw(app);
+            game.draw_game(app);
         }
-        // else
-        // {
-        //     app.close();
-        // }
+        else
+        {
+            app.close();
+        }
     }
 
     return 0;
