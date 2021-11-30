@@ -8,14 +8,18 @@ What Works:
 - Basic Main Menu
 - Basic Game
 
+Functions:
+- Collision with Asteroid returns to menu and resets sprites
+- Pressing Esc returns to menu and resets sprites
+- Reset High Score resets the High Score File
+
 What doesn't work:
-- Only the "Play" option currently works. Other menu options close the window
-- Menu only supports Keyboard Input
+- You tell me
 
 To be implemented/added:
 - Menu Background
 - Pause Menu
-- Score and Lives system for player
+- Lives system for player
 - Scoreboard
 - Splash Screen?
 
