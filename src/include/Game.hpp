@@ -74,13 +74,20 @@ class Game
     Animation sExplosion, sRock, sRock_small, sBullet, sPlayer, sPlayer_go, sExplosion_ship; 
     Sprite background;
     // create a list containing all of the entities currently in use
-    std::list<Entity*> entities;    
+    std::list<Entity*> entities;
+
+    int score;
+    Font scoreFont;
+    Text scoreText; 
     
     // pointer for player
     player *p;
+    bool endGame;
+    void spawn_asteroid();
 
     Game();
-    void draw_game(RenderWindow& app);
+    int draw_game(RenderWindow& app);
+    void reset_game();
 };
 
 // detecting collisions using distance between centers of sprites and radii of their bounding circles 

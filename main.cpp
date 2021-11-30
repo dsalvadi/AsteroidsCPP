@@ -15,23 +15,46 @@ int main()
     Game game;
     app.setFramerateLimit(60);
     MainMenu mainMenu(W, H);
+    int lastScore = 0;
 
     /////main loop/////
     while (app.isOpen())
     {
+        // Main Menu State
         if (state == -1)
         {
-            mainMenu.draw(app);
+            mainMenu.draw(app, lastScore);
             state = mainMenu.stateInfo;
         }
+        // Game State
         else if (state == 0)
         {
-            game.draw_game(app);
+            app.clear();
+            state = game.draw_game(app);
         }
+        // High Score Reset Functionality
+        else if (state == 1)
+        {
+            mainMenu.ResetScore();
+            mainMenu.stateInfo = -1;
+            state = -1;
+        }
+        // Post Game Over State, Returns to Menu State post reset.
+        else if (state == 3)
+        {
+            lastScore = game.score;
+            mainMenu.CheckHigh(lastScore);  // Compare last score and recorded high score. Update.
+            game.reset_game();              // Reset Game State
+            mainMenu.stateInfo = -1;        // Return to Menu State
+            state = -1;
+            // mainMenu.draw(app);
+        }
+        // Any other option closes the window
         else
         {
             app.close();
         }
+        //cout << state;    // Debug Current State
     }
 
     return 0;

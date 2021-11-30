@@ -2,6 +2,7 @@
 #include <math.h>
 #include <time.h>
 #include <iostream>
+#include <string>
 
 // Window size
 const int W = 1200;
@@ -25,7 +26,8 @@ Animation::Animation() {}
 //     sprite.setOrigin(w / 2, h / 2);
 //     sprite.setTextureRect(frames[0]);
 // }
-    // Creating method to set params for pre-declared animations
+
+// Creating method to set params for pre-declared animations
 void Animation::init_anim(Texture &t, int x, int y, int w, int h, int count, float Speed)
 {
     Frame = 0;
@@ -172,21 +174,21 @@ Game::Game()
 {
     srand(time(0));
 
-    if(!t1.loadFromFile("images/spaceship.png"))
-        std::cout<<"Error in t1"<<std::endl;
-    if(!t2.loadFromFile("images/background.jpg"))
-        std::cout<<"Error in t2"<<std::endl;
-    if(!t3.loadFromFile("images/explosions/type_C.png"))
-        std::cout<<"Error in t3"<<std::endl;
-    if(!t4.loadFromFile("images/rock.png"))
-        std::cout<<"Error in t4"<<std::endl;
-    if(!t5.loadFromFile("images/fire_blue.png"))
-        std::cout<<"Error in t5"<<std::endl;
-    if(!t6.loadFromFile("images/rock_small.png"))
-        std::cout<<"Error in t6"<<std::endl;
-    if(!t7.loadFromFile("images/explosions/type_B.png"))
-        std::cout<<"Error in t7"<<std::endl;
-    
+    if (!t1.loadFromFile("images/spaceship.png"))
+        std::cout << "Error in t1" << std::endl;
+    if (!t2.loadFromFile("images/background.jpg"))
+        std::cout << "Error in t2" << std::endl;
+    if (!t3.loadFromFile("images/explosions/type_C.png"))
+        std::cout << "Error in t3" << std::endl;
+    if (!t4.loadFromFile("images/rock.png"))
+        std::cout << "Error in t4" << std::endl;
+    if (!t5.loadFromFile("images/fire_blue.png"))
+        std::cout << "Error in t5" << std::endl;
+    if (!t6.loadFromFile("images/rock_small.png"))
+        std::cout << "Error in t6" << std::endl;
+    if (!t7.loadFromFile("images/explosions/type_B.png"))
+        std::cout << "Error in t7" << std::endl;
+
     t1.setSmooth(true);
     t2.setSmooth(true);
 
@@ -208,19 +210,32 @@ Game::Game()
     sPlayer_go.init_anim(t1, 40, 40, 40, 40, 1, 0);
     sExplosion_ship.init_anim(t7, 0, 0, 192, 192, 64, 0.5);
 
-    // spawn in 15 asteroids in the window
-    for (int i = 0; i < 15; i++)
-    {
-        asteroid *a = new asteroid();
-        a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
-        entities.push_back(a);
-    }
+    // // spawn in 15 asteroids in the window
+    // for (int i = 0; i < 15; i++)
+    // {
+    //     asteroid *a = new asteroid();
+    //     a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
+    //     entities.push_back(a);
+    // }
 
-    // spawn the player
-    p = new player();
-    p -> settings(sPlayer, 200, 200, 0, 20);
-    //std::cout << p->x << " " << p->y << std::endl;
-    entities.push_back(p);
+    // // spawn the player
+    // p = new player();
+    // p->settings(sPlayer, 200, 200, 0, 20);
+    // //std::cout << p->x << " " << p->y << std::endl;
+    // entities.push_back(p);
+
+    reset_game();
+    
+    if (!scoreFont.loadFromFile("fonts/Montserrat-Medium.ttf"))
+    {
+        std::cout << "No Font Found";
+    }    
+    scoreText.setFont(scoreFont);
+    scoreText.setFillColor(Color::White);
+    scoreText.setString(std::to_string(score));
+    scoreText.setCharacterSize(30);
+    scoreText.setPosition(0, 0);
+    //std::cout<<score;
 }
 
 // Function to check for collisions between entities
@@ -229,10 +244,12 @@ bool isCollide(Entity *a, Entity *b)
     return (b->x - a->x) * (b->x - a->x) + (b->y - a->y) * (b->y - a->y) < (a->R + b->R) * (a->R + b->R);
 }
 
-void Game::draw_game(RenderWindow &app)
+int Game::draw_game(RenderWindow &app)
 {
+    endGame = false; // For hit detection
+
     Event event;
-    
+
     while (app.pollEvent(event))
     {
         if (event.type == Event::Closed)
@@ -247,6 +264,14 @@ void Game::draw_game(RenderWindow &app)
                 entities.push_back(b);
             }
         }
+        // check for escape trigger, go to main menu if tapped
+        if (event.type == Event::KeyPressed)
+        {
+            if (event.key.code == Keyboard::Escape)
+            {
+                return 3;
+            }
+        }
     }
 
     // Rotate ship by 3 deg. based on direction
@@ -258,12 +283,13 @@ void Game::draw_game(RenderWindow &app)
         p->thrust = true;
     else
         p->thrust = false;
-    
+
     // iterate through every entity and check for collisions between two types of objects
     for (auto a : entities)
     {
         for (auto b : entities)
         {
+
             if (a->name == "asteroid" && b->name == "bullet")
             {
                 if (isCollide(a, b))
@@ -275,6 +301,9 @@ void Game::draw_game(RenderWindow &app)
                     e->settings(sExplosion, a->x, a->y);
                     e->name = "explosion";
                     entities.push_back(e);
+
+                    // Update Score, +10 per collision
+                    score = score + 10;
 
                     for (int i = 0; i < 2; i++)
                     {
@@ -300,6 +329,8 @@ void Game::draw_game(RenderWindow &app)
                     p->settings(sPlayer, W / 2, H / 2, 0, 20);
                     p->dx = 0;
                     p->dy = 0;
+
+                    endGame = true;
                 }
             }
         }
@@ -310,48 +341,98 @@ void Game::draw_game(RenderWindow &app)
         p->anim = sPlayer_go;
     else
         p->anim = sPlayer;
-    
+
     // delete explosion entity if animation has ended
     for (auto e : entities)
         if (e->name == "explosion")
             if (e->anim.isEnd())
                 e->life = 0;
-    
+
     // spawn an asteroid randomly
-    // if (rand()%150==0)
-    //  {
-    //    asteroid *a = new asteroid();
-    //    a->settings(sRock, 0,rand()%H, rand()%360, 25);
-    //    entities.push_back(a);
-    //  }
+    if (rand() % 300 == 0)
+    {
+        asteroid *a = new asteroid();
+        a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
+        entities.push_back(a);
+    }
+
     // check life of entities. Despawn them if their life has ended
-    
     for (auto i = entities.begin(); i != entities.end();)
     {
         Entity *e = *i;
         e->update();
         e->anim.update();
         //if (e->name != "asteroid")
-            //std::cout<< e->name << " " << e->x << "," << e->y << " " << e->life << std::endl;
+        //std::cout<< e->name << " " << e->x << "," << e->y << " " << e->life << std::endl;
         if (e->life == false)
-        {
+        {  
             i = entities.erase(i);
             delete e;
         }
         else
             i++;
     }
+
+    // Update Score
+    scoreText.setString("Score: " + std::to_string(score));
+
     //////draw//////
     //app.clear();
+    // Draw Background
     app.draw(background);
+    // Draw Entities
     for (auto i : entities)
     {
         i->draw(app);
-        // if (i->name != "asteroid")
-        // {
-        //     std::cout<< i->name << " " << i->x << "," << i->y << " " << i->life << std::endl;
-        // }
     }
+    // Draw Score
+    app.draw(scoreText);
+    
+    // Display frame
     app.display();
+    
+    // Goto state 3 if end, else keep at state 1
+    if (endGame)
+        return 3;
+    else
+        return 0;
 }
 
+void Game::spawn_asteroid()
+{
+    asteroid *a = new asteroid();
+    a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
+    entities.push_back(a);
+}
+
+void Game::reset_game()
+{
+    //// Delete existing entities from list and memory
+
+    for (auto i = entities.begin(); i != entities.end();)
+    {
+        Entity *e = *i;
+        i = entities.erase(i);
+        delete e;
+    }
+ 
+    //// Respawn Asteroids and Player
+
+    // spawn in 15 asteroids in the window
+    for (int i = 0; i < 15; i++)
+    {
+        asteroid *a = new asteroid();
+        a->settings(sRock, rand() % W, rand() % H, rand() % 360, 25);
+        entities.push_back(a);
+    }
+
+    // spawn the player
+    p = new player();
+    p->settings(sPlayer, W/2, H/2, 0, 20);
+    entities.push_back(p);
+
+    //// Reset Score to 0
+    score = 0;
+    endGame = false;
+
+}
